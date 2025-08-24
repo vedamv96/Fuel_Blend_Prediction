@@ -1,0 +1,6 @@
+runtime: python311
+entrypoint: gunicorn -b :$PORT app:app
+
+instance_class: F1  # free tier
+automatic_scaling:
+  min_instances: 1
