@@ -1,6 +1,6 @@
-streamlit
+flask
 pandas
-numpy
+joblib
 scikit-learn
 xgboost
-joblib
+gunicorn

@@ -25,7 +25,7 @@
 
         /* Container for form */
         .container {
-            max-width: 700px;
+            max-width: 900px;
             margin: 40px auto;
             background-color: #ffffff;
             padding: 30px 40px;
@@ -130,6 +130,14 @@
             margin-top: 20px;
         }
 
+        /* Instructions */
+        #instructions {
+            margin-top: 15px;
+            color: #1565c0;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -155,9 +163,15 @@
             <input type="submit" value="Predict Blend Properties">
         </form>
 
+        <p id="instructions">
+            After clicking <strong>Predict Blend Properties</strong>, your predicted blend properties will appear below.
+        </p>
+
         <!-- Table placeholder for predictions -->
         <div id="result">
-            <!-- Predictions will appear here after submission -->
+            {% if tables %}
+                {{ tables | safe }}
+            {% endif %}
         </div>
     </div>
 </body>

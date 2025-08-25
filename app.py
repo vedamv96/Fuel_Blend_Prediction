@@ -1,31 +1,36 @@
-# streamlit_app.py
-import streamlit as st
+from flask import Flask, request, render_template
 import pandas as pd
 import joblib
 
-# 1️⃣ Load your trained MultiOutputRegressor model
-model = joblib.load('multioutput_model.pkl')  # ensure this file is in the same folder
+app = Flask(__name__)
 
-# 2️⃣ App title
-st.title("Fuel Blend Property Prediction")
-st.markdown("Upload a CSV file with test data and get predicted Blend Properties.")
+# Load model
+model = joblib.load("multioutput_model.pkl")
 
-# 3️⃣ File uploader
-uploaded_file = st.file_uploader("Upload your test.csv file", type="csv")
+@app.route('/')
+def home():
+    return render_template("index.html")
 
-if uploaded_file:
-    # 4️⃣ Read CSV
-    df_test = pd.read_csv(uploaded_file)
-    st.subheader("Uploaded Data")
-    st.dataframe(df_test)
+@app.route('/predict', methods=['POST'])
+def predict():
+    # Check for uploaded file
+    if 'file' not in request.files:
+        return render_template("index.html", tables=None)
+    
+    file = request.files['file']
+    if file.filename == '':
+        return render_template("index.html", tables=None)
 
-    # 5️⃣ Prepare features
+    # Read CSV
+    df_test = pd.read_csv(file)
+
+    # Prepare features
     features = df_test.drop(columns=['ID'], errors='ignore')
 
-    # 6️⃣ Make predictions
+    # Make predictions
     predictions = model.predict(features)
 
-    # 7️⃣ Prepare output DataFrame
+    # Prepare output DataFrame
     output_df = pd.DataFrame(predictions, columns=[
         'BlendProperty1','BlendProperty2','BlendProperty3','BlendProperty4','BlendProperty5',
         'BlendProperty6','BlendProperty7','BlendProperty8','BlendProperty9','BlendProperty10'
@@ -35,10 +40,10 @@ if uploaded_file:
     if 'ID' in df_test.columns:
         output_df.insert(0, 'ID', df_test['ID'])
 
-    # 8️⃣ Display predictions
-    st.subheader("Predicted Blend Properties")
-    st.dataframe(output_df)
+    # Convert DataFrame to HTML table
+    table_html = output_df.to_html(classes='table table-striped', index=False)
 
-    # 9️⃣ Allow user to download predictions
-    csv = output_df.to_csv(index=False)
-    st.download_button("Download Predictions", data=csv, file_name='predictions.csv', mime='text/csv')
+    return render_template("index.html", tables=table_html)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
